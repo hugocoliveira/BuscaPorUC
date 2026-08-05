@@ -1,0 +1,6 @@
+{
+  "versionCode": 1,
+  "versionName": "1.0",
+  "apkUrl": "https://github.com/hugocoliveira/BuscaPorUC/releases/download/v1.0/app-release.apk",
+  "releaseNotes": "Versão inicial — leitura de QR Code de UC (TD, ITD, Tds, ST., TpPr, PArm, Prod, PDO, PDD, DtCo, HrCo)."
+}
