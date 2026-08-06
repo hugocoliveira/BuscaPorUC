@@ -27,7 +27,7 @@ private val ROTULOS_CAMPOS = listOf(
  */
 data class UiState(
     val campos: List<Pair<String, String>>? = null,
-    val scannerAberto: Boolean              = true,
+    val scannerAberto: Boolean              = false,
     val erro: String?                       = null
 )
 
