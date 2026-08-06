@@ -21,11 +21,13 @@ private val ROTULOS_CAMPOS = listOf(
 /**
  * Estado imutável da tela de leitura.
  *
+ * @property campoBusca    texto digitado ou lido pelo scanner.
  * @property campos        pares (rótulo, valor) extraídos do QR. null antes do primeiro scan.
  * @property scannerAberto true quando o overlay de câmera está visível.
  * @property erro          mensagem de erro ou null.
  */
 data class UiState(
+    val campoBusca: String                  = "",
     val campos: List<Pair<String, String>>? = null,
     val scannerAberto: Boolean              = false,
     val erro: String?                       = null
@@ -39,11 +41,26 @@ class MainViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
+    /** Atualiza o texto do campo de busca e limpa erros anteriores. */
+    fun onCampoAlterado(texto: String) {
+        _uiState.update { it.copy(campoBusca = texto, erro = null) }
+    }
+
+    /** Limpa campo, resultados e erros. */
+    fun onLimpar() {
+        _uiState.update { UiState() }
+    }
+
+    /** Dispara o parse com o conteúdo atual do campo. */
+    fun onBuscar() {
+        onCodigoEscaneado(_uiState.value.campoBusca)
+    }
+
     /**
-     * Chamado quando a câmera detecta um QR Code.
-     * Faz o parse por ';' e mapeia para os rótulos definidos em [ROTULOS_CAMPOS].
+     * Chamado quando a câmera detecta um QR Code ou o usuário confirma o campo.
+     * Faz o parse por '|' e mapeia para os rótulos definidos em [ROTULOS_CAMPOS].
      *
-     * @param codigo valor bruto lido (ex: "100003904;1;1;C;Y353;YINQ;EWMS4-03;...").
+     * @param codigo valor bruto lido (ex: "100003904|1|1|C|Y353|YINQ|EWMS4-03|...").
      */
     fun onCodigoEscaneado(codigo: String) {
         val partes = codigo.split("|")
@@ -51,9 +68,10 @@ class MainViewModel : ViewModel() {
         if (partes.size != ROTULOS_CAMPOS.size) {
             _uiState.update {
                 it.copy(
+                    campoBusca    = codigo,
                     scannerAberto = false,
-                    erro   = "Dado não encontrado",
-                    campos = null
+                    erro          = "Dado não encontrado",
+                    campos        = null
                 )
             }
             return
@@ -61,6 +79,7 @@ class MainViewModel : ViewModel() {
 
         _uiState.update {
             it.copy(
+                campoBusca    = codigo,
                 scannerAberto = false,
                 campos        = ROTULOS_CAMPOS.zip(partes),
                 erro          = null

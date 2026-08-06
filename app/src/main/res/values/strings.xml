@@ -2,10 +2,12 @@
 <resources>
     <string name="app_name">Busca Por UC</string>
     <string name="titulo_tela">Busca Por UC</string>
-    <string name="botao_escanear">Escanear QR Code</string>
-    <string name="botao_escanear_novamente">Escanear novamente</string>
+    <string name="label_campo_busca">Código UC</string>
+    <string name="placeholder_campo_busca">Digite ou escaneie o QR Code</string>
+    <string name="botao_buscar">Buscar</string>
+    <string name="botao_limpar">Limpar</string>
+    <string name="descricao_icone_scanner">Escanear QR Code</string>
     <string name="fechar_scanner">Fechar scanner</string>
     <string name="permissao_camera_negada">Permissão de câmera necessária para usar este aplicativo.</string>
-    <string name="erro_qrcode_invalido">QR Code inválido: esperado 11 campos separados por ponto e vírgula.</string>
     <string name="aguardando_leitura">Aponte a câmera para o QR Code</string>
 </resources>

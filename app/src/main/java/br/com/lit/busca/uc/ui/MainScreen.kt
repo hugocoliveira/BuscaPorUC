@@ -19,7 +19,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.Button
@@ -30,6 +33,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -47,6 +51,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -65,6 +71,7 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsState()
     val context         = LocalContext.current
     val lifecycleOwner  = LocalLifecycleOwner.current
+    val permissaoCamera = rememberPermissionState(Manifest.permission.CAMERA)
 
     // Toca error.wav sempre que uiState.erro mudar para não-nulo
     LaunchedEffect(uiState.erro) {
@@ -74,7 +81,6 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
             mp.start()
         }
     }
-    val permissaoCamera = rememberPermissionState(Manifest.permission.CAMERA)
 
     Scaffold(
         topBar = {
@@ -86,8 +92,11 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             ConteudoPrincipal(
-                uiState        = uiState,
-                onAbrirScanner = {
+                uiState         = uiState,
+                onCampoAlterado = viewModel::onCampoAlterado,
+                onBuscar        = viewModel::onBuscar,
+                onLimpar        = viewModel::onLimpar,
+                onAbrirScanner  = {
                     if (permissaoCamera.status.isGranted) viewModel.onAbrirScanner()
                     else permissaoCamera.launchPermissionRequest()
                 }
@@ -101,20 +110,74 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
 }
 
 @Composable
-private fun ConteudoPrincipal(uiState: UiState, onAbrirScanner: () -> Unit) {
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
-        if (uiState.erro != null) {
-            item {
-                Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), shape = RoundedCornerShape(6.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
-                    Text(uiState.erro, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onErrorContainer, modifier = Modifier.padding(12.dp))
+private fun ConteudoPrincipal(
+    uiState: UiState,
+    onCampoAlterado: (String) -> Unit,
+    onBuscar: () -> Unit,
+    onLimpar: () -> Unit,
+    onAbrirScanner: () -> Unit
+) {
+    LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(0.dp)) {
+
+        // Campo de texto + botão Buscar
+        item {
+            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp)) {
+                OutlinedTextField(
+                    value         = uiState.campoBusca,
+                    onValueChange = onCampoAlterado,
+                    modifier      = Modifier.fillMaxWidth(),
+                    label         = { Text(stringResource(R.string.label_campo_busca)) },
+                    placeholder   = { Text(stringResource(R.string.placeholder_campo_busca)) },
+                    singleLine    = true,
+                    shape         = RoundedCornerShape(12.dp),
+                    trailingIcon  = {
+                        if (uiState.campoBusca.isNotEmpty()) {
+                            IconButton(onClick = onLimpar) {
+                                Icon(Icons.Default.Clear, stringResource(R.string.botao_limpar), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        } else {
+                            IconButton(onClick = onAbrirScanner) {
+                                Icon(Icons.Default.QrCodeScanner, stringResource(R.string.descricao_icone_scanner), tint = MaterialTheme.colorScheme.primary)
+                            }
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(onSearch = { onBuscar() })
+                )
+                Spacer(Modifier.height(6.dp))
+                Button(
+                    onClick  = onBuscar,
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled  = uiState.campoBusca.isNotBlank(),
+                    shape    = RoundedCornerShape(8.dp)
+                ) {
+                    Text(stringResource(R.string.botao_buscar), style = MaterialTheme.typography.labelLarge)
                 }
-                Spacer(Modifier.height(8.dp))
             }
         }
 
+        // Banner de erro
+        if (uiState.erro != null) {
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 2.dp),
+                    shape    = RoundedCornerShape(6.dp),
+                    colors   = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                ) {
+                    Text(uiState.erro, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onErrorContainer, modifier = Modifier.padding(12.dp))
+                }
+            }
+        }
+
+        // Card de resultados
         if (!uiState.campos.isNullOrEmpty()) {
             item {
-                Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), shape = RoundedCornerShape(6.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
+                Card(
+                    modifier  = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                    shape     = RoundedCornerShape(6.dp),
+                    colors    = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         uiState.campos.forEachIndexed { i, (rotulo, valor) ->
                             if (i > 0) HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = MaterialTheme.colorScheme.outline)
@@ -122,11 +185,11 @@ private fun ConteudoPrincipal(uiState: UiState, onAbrirScanner: () -> Unit) {
                         }
                     }
                 }
-                Spacer(Modifier.height(12.dp))
             }
         }
 
-        if (uiState.campos == null && uiState.erro == null) {
+        // Estado inicial — nenhum dado lido ainda
+        if (uiState.campos == null && uiState.erro == null && uiState.campoBusca.isEmpty()) {
             item {
                 Box(modifier = Modifier.fillMaxWidth().padding(top = 48.dp), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -135,17 +198,10 @@ private fun ConteudoPrincipal(uiState: UiState, onAbrirScanner: () -> Unit) {
                         Text(stringResource(R.string.aguardando_leitura), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
-                Spacer(Modifier.height(24.dp))
             }
         }
 
-        item {
-            Button(onClick = onAbrirScanner, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)) {
-                Icon(Icons.Default.QrCodeScanner, null)
-                Spacer(Modifier.width(8.dp))
-                Text(if (uiState.campos != null) stringResource(R.string.botao_escanear_novamente) else stringResource(R.string.botao_escanear), style = MaterialTheme.typography.labelLarge)
-            }
-        }
+        item { Spacer(Modifier.height(8.dp)) }
     }
 }
 
