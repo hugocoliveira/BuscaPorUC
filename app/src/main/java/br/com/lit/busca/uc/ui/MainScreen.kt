@@ -1,6 +1,7 @@
 package br.com.lit.busca.uc.ui
 
 import android.Manifest
+import android.media.MediaPlayer
 import android.util.Log
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedVisibility
@@ -35,6 +36,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,6 +65,15 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsState()
     val context         = LocalContext.current
     val lifecycleOwner  = LocalLifecycleOwner.current
+
+    // Toca error.wav sempre que uiState.erro mudar para não-nulo
+    LaunchedEffect(uiState.erro) {
+        if (uiState.erro != null) {
+            val mp = MediaPlayer.create(context, R.raw.error)
+            mp.setOnCompletionListener { it.release() }
+            mp.start()
+        }
+    }
     val permissaoCamera = rememberPermissionState(Manifest.permission.CAMERA)
 
     Scaffold(

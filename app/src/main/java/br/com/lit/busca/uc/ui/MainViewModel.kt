@@ -52,7 +52,7 @@ class MainViewModel : ViewModel() {
             _uiState.update {
                 it.copy(
                     scannerAberto = false,
-                    erro   = "QR Code inválido: esperado ${ROTULOS_CAMPOS.size} campos, recebido ${partes.size}.",
+                    erro   = "Dado não encontrado",
                     campos = null
                 )
             }

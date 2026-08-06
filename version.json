@@ -1,1 +1,1 @@
-{"versionCode":4,"versionName":"1.3","apkUrl":"https://github.com/hugocoliveira/BuscaPorUC/releases/download/v1.3/app-release.apk","releaseNotes":"fix: separador QR Code alterado para | (evita leitura cruzada com BuscaPorFila)."}
+{"versionCode":5,"versionName":"1.4","apkUrl":"https://github.com/hugocoliveira/BuscaPorUC/releases/download/v1.4/app-release.apk","releaseNotes":"feat: mensagem de erro 'Dado não encontrado' e alerta sonoro ao ler QR inválido."}
