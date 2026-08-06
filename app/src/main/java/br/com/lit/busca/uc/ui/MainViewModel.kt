@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 
 /**
  * Rótulos dos campos na ordem exata em que aparecem no QR Code de UC.
- * Formato do QR: TD;ITD;Tds;ST.;TpPr;PArm;Prod;PDO;PDD;DtCo;HrCo
+ * Formato do QR: TD|ITD|Tds|ST.|TpPr|PArm|Prod|PDO|PDD|DtCo|HrCo (separador | diferencia do BuscaPorFila que usa ;)
  */
 private val ROTULOS_CAMPOS = listOf(
     "TD", "ITD", "Tds", "ST.", "TpPr", "PArm", "Prod", "PDO", "PDD", "DtCo", "HrCo"
@@ -46,7 +46,7 @@ class MainViewModel : ViewModel() {
      * @param codigo valor bruto lido (ex: "100003904;1;1;C;Y353;YINQ;EWMS4-03;...").
      */
     fun onCodigoEscaneado(codigo: String) {
-        val partes = codigo.split(";")
+        val partes = codigo.split("|")
 
         if (partes.size != ROTULOS_CAMPOS.size) {
             _uiState.update {
