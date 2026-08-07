@@ -18,8 +18,8 @@ android {
         applicationId = "br.com.lit.busca.uc"
         minSdk        = 24
         targetSdk     = 36
-        versionCode   = 7
-        versionName   = "1.6"
+        versionCode   = 8
+        versionName   = "1.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }

@@ -68,7 +68,7 @@ class MainViewModel : ViewModel() {
         if (partes.size != ROTULOS_CAMPOS.size) {
             _uiState.update {
                 it.copy(
-                    campoBusca    = codigo,
+                    campoBusca    = "",
                     scannerAberto = false,
                     erro          = "Dado não encontrado",
                     campos        = null

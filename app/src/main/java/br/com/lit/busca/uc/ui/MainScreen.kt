@@ -75,15 +75,6 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
     val lifecycleOwner  = LocalLifecycleOwner.current
     val permissaoCamera = rememberPermissionState(Manifest.permission.CAMERA)
 
-    // Toca error.wav sempre que uiState.erro mudar para não-nulo
-    LaunchedEffect(uiState.erro) {
-        if (uiState.erro != null) {
-            val mp = MediaPlayer.create(context, R.raw.error)
-            mp.setOnCompletionListener { it.release() }
-            mp.start()
-        }
-    }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -119,11 +110,22 @@ private fun ConteudoPrincipal(
     onLimpar: () -> Unit,
     onAbrirScanner: () -> Unit
 ) {
+    val context = LocalContext.current
     val focusRequester = remember { FocusRequester() }
 
-    // Retorna foco ao campo após exibir resultados para leitura imediata do próximo código
+    // Toca som e retorna foco após resultado com sucesso
     LaunchedEffect(uiState.campos) {
         if (!uiState.campos.isNullOrEmpty()) runCatching { focusRequester.requestFocus() }
+    }
+
+    // Toca som e retorna foco após erro (QR inválido)
+    LaunchedEffect(uiState.erro) {
+        if (uiState.erro != null) {
+            val mp = MediaPlayer.create(context, R.raw.error)
+            mp.setOnCompletionListener { it.release() }
+            mp.start()
+            runCatching { focusRequester.requestFocus() }
+        }
     }
 
     LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(0.dp)) {
