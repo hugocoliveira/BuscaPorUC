@@ -47,6 +47,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
@@ -117,6 +119,13 @@ private fun ConteudoPrincipal(
     onLimpar: () -> Unit,
     onAbrirScanner: () -> Unit
 ) {
+    val focusRequester = remember { FocusRequester() }
+
+    // Retorna foco ao campo após exibir resultados para leitura imediata do próximo código
+    LaunchedEffect(uiState.campos) {
+        if (!uiState.campos.isNullOrEmpty()) runCatching { focusRequester.requestFocus() }
+    }
+
     LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(0.dp)) {
 
         // Campo de texto + botão Buscar
@@ -125,7 +134,7 @@ private fun ConteudoPrincipal(
                 OutlinedTextField(
                     value         = uiState.campoBusca,
                     onValueChange = onCampoAlterado,
-                    modifier      = Modifier.fillMaxWidth(),
+                    modifier      = Modifier.fillMaxWidth().focusRequester(focusRequester),
                     label         = { Text(stringResource(R.string.label_campo_busca)) },
                     placeholder   = { Text(stringResource(R.string.placeholder_campo_busca)) },
                     singleLine    = true,
