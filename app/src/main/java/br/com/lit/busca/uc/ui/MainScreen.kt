@@ -116,18 +116,20 @@ private fun ConteudoPrincipal(
 
     LaunchedEffect(uiState.campos) {
         if (!uiState.campos.isNullOrEmpty()) {
-            keyboardController?.hide()
             runCatching { focusRequester.requestFocus() }
+            kotlinx.coroutines.delay(100)
+            keyboardController?.hide()
         }
     }
 
     LaunchedEffect(uiState.erro) {
         if (uiState.erro != null) {
-            keyboardController?.hide()
             val mp = MediaPlayer.create(context, R.raw.error)
             mp.setOnCompletionListener { it.release() }
             mp.start()
             runCatching { focusRequester.requestFocus() }
+            kotlinx.coroutines.delay(100)
+            keyboardController?.hide()
         }
     }
 
