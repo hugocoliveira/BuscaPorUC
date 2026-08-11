@@ -48,6 +48,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -148,7 +151,10 @@ private fun ConteudoPrincipal(
                 OutlinedTextField(
                     value         = uiState.campoBusca,
                     onValueChange = onCampoAlterado,
-                    modifier      = Modifier.fillMaxWidth().focusRequester(focusRequester),
+                    modifier      = Modifier.fillMaxWidth().focusRequester(focusRequester).onKeyEvent { keyEvent ->
+                        if (keyEvent.type == KeyEventType.KeyDown) keyboardController?.hide()
+                        false
+                    },
                     label         = { Text(stringResource(R.string.label_campo_busca)) },
                     placeholder   = { Text(stringResource(R.string.placeholder_campo_busca)) },
                     singleLine    = true,
