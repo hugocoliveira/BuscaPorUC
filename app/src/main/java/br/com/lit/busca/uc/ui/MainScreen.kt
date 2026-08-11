@@ -50,6 +50,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -111,15 +112,18 @@ private fun ConteudoPrincipal(
 ) {
     val context = LocalContext.current
     val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
-    // Toca som e retorna foco após resultado com sucesso
     LaunchedEffect(uiState.campos) {
-        if (!uiState.campos.isNullOrEmpty()) runCatching { focusRequester.requestFocus() }
+        if (!uiState.campos.isNullOrEmpty()) {
+            keyboardController?.hide()
+            runCatching { focusRequester.requestFocus() }
+        }
     }
 
-    // Toca som e retorna foco após erro (QR inválido)
     LaunchedEffect(uiState.erro) {
         if (uiState.erro != null) {
+            keyboardController?.hide()
             val mp = MediaPlayer.create(context, R.raw.error)
             mp.setOnCompletionListener { it.release() }
             mp.start()
