@@ -29,7 +29,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -180,7 +179,7 @@ private fun ConteudoPrincipal(
             }
         }
 
-        // Card de resultados
+        // Card de resultados — grid 2 colunas
         if (!uiState.campos.isNullOrEmpty()) {
             item {
                 Card(
@@ -189,10 +188,17 @@ private fun ConteudoPrincipal(
                     colors    = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        uiState.campos.forEachIndexed { i, (rotulo, valor) ->
-                            if (i > 0) HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = MaterialTheme.colorScheme.outline)
-                            CampoLinha(rotulo, valor)
+                    Column(
+                        modifier            = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        uiState.campos.chunked(2).forEach { par ->
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                CampoLinha(par[0].first, par[0].second, Modifier.weight(1f))
+                                Spacer(Modifier.width(16.dp))
+                                if (par.size > 1) CampoLinha(par[1].first, par[1].second, Modifier.weight(1f))
+                                else Spacer(Modifier.weight(1f))
+                            }
                         }
                     }
                 }
@@ -217,11 +223,10 @@ private fun ConteudoPrincipal(
 }
 
 @Composable
-private fun CampoLinha(rotulo: String, valor: String) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text("$rotulo:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.SemiBold, modifier = Modifier.width(60.dp))
-        Spacer(Modifier.width(8.dp))
-        Text(valor, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
+private fun CampoLinha(rotulo: String, valor: String, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        Text("$rotulo:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
+        Text(valor, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
     }
 }
 
